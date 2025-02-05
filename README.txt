@@ -1,6 +1,6 @@
-Double click the ./dragonruby executable to start up the game.
+Double click the ./dinosaur-jump/dragonruby executable to start up the game.
 
-Source code is located at ./mygame/app/main.rb.
+Source code is located at ./dinosaur-jump/mygame/app/main.rb.
 
 Come hangout on the Discord Server! http://discord.dragonruby.org :-)
 
