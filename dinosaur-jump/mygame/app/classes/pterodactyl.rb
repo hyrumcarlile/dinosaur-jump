@@ -7,7 +7,14 @@ class Pterodactyl < BaseObject
     true
   end
 
-  def sprite_path
-    'sprites/misc/pterodactyl.png'
+  def sprites
+    [
+      'sprites/misc/dragon-reversed/dragon-0.png',
+      'sprites/misc/dragon-reversed/dragon-1.png',
+      'sprites/misc/dragon-reversed/dragon-2.png',
+      'sprites/misc/dragon-reversed/dragon-3.png',
+      'sprites/misc/dragon-reversed/dragon-4.png',
+      'sprites/misc/dragon-reversed/dragon-5.png'
+    ]
   end
 end

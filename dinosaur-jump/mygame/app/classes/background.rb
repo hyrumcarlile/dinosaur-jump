@@ -15,7 +15,7 @@ class Background < BaseObject
     false
   end
 
-  def sprite_path
-    'sprites/misc/background.jpg'
+  def sprites
+    ['sprites/misc/background.jpg']
   end
 end

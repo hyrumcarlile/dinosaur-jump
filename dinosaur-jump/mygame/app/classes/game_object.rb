@@ -37,11 +37,11 @@ class GameObject
     return if @game_over
 
     if rand(220) == 0
-      @output_args.state.objects << Cactus.new(x: Grid.w, y: 0, w: 100, h: 100, x_velocity: -5, gravity: 0)
+      @output_args.state.objects << Cactus.new(x: Grid.w, y: 0, w: 60, h: 80, x_velocity: -7, gravity: 0)
     end
 
     if rand(500) == 0
-      @output_args.state.objects << Pterodactyl.new(x: Grid.w, y: (rand(150) + 100), w: 100, h: 100, x_velocity: -8, gravity: 0)
+      @output_args.state.objects << Pterodactyl.new(x: Grid.w, y: (rand(150) + 100), w: 80, h: 70, x_velocity: -9, gravity: 0)
     end
   end
 

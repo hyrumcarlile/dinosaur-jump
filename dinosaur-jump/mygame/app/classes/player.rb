@@ -1,9 +1,9 @@
 class Player < BaseObject
   ALLOWED_JUMP_INCREASE_TIME = 10
   JUMP_INCREASE_POWER = 1
-  JUMP_POWER = 13
+  JUMP_POWER = 15
 
-  def initialize(w: 120, h: 120, x: 30, y: 0, x_velocity: 0, y_velocity: 0, x_acceleration: 0, y_acceleration: 0, gravity: -1, is_affected_by_gravity: true, action_at: nil)
+  def initialize(w: 60, h: 60, x: 30, y: 0, x_velocity: 0, y_velocity: 0, x_acceleration: 0, y_acceleration: 0, gravity: -1, is_affected_by_gravity: true, sprite_change_frequency: 5, action_at: nil)
     super
     @w = w
     @h = h
@@ -48,7 +48,7 @@ class Player < BaseObject
   end
 
   def check_for_collisions(objects:)
-    hitbox = { left: @x + 80, right: @x + @w - 35, bottom: @y, top: @y + @h - 20}
+    hitbox = { left: @x + 30, right: @x + @w - 20, bottom: @y, top: @y + @h - 20}
     objects.each do |object|
       mins_overlap = (object.x >= hitbox[:left] && object.x <= hitbox[:right]) && (object.y >= hitbox[:bottom] && object.y <= hitbox[:top])
       maxs_overlap = (object.x + object.w >= hitbox[:left] && object.x + object.w <= hitbox[:right]) && (object.y + object.h >= hitbox[:bottom] && object.y + object.h <= hitbox[:top])
@@ -61,7 +61,13 @@ class Player < BaseObject
     return false # no collisions with any objects
   end
 
-  def sprite_path
-    'sprites/misc/dinosaur.png'
+  def sprites
+    [
+      'sprites/misc/dinosaur/dinosaur-1.png',
+      'sprites/misc/dinosaur/dinosaur-2.png',
+      'sprites/misc/dinosaur/dinosaur-3.png',
+      'sprites/misc/dinosaur/dinosaur-4.png',
+      'sprites/misc/dinosaur/dinosaur-5.png'
+    ]
   end
 end

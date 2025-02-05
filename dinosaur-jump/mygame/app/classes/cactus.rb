@@ -7,7 +7,7 @@ class Cactus < BaseObject
     true
   end
 
-  def sprite_path
-    'sprites/misc/cactus.png'
+  def sprites
+    ['sprites/misc/cactus.png']
   end
 end

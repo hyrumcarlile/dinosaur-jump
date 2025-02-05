@@ -1,5 +1,5 @@
 class BaseObject
-  def initialize(w: 0, h: 0, x: 0, y: 0, x_velocity: 0, y_velocity: 0, x_acceleration: 0, y_acceleration: 0, gravity: -1)
+  def initialize(w: 0, h: 0, x: 0, y: 0, x_velocity: 0, y_velocity: 0, x_acceleration: 0, y_acceleration: 0, gravity: -1, sprite_change_frequency: 5)
     @w = w
     @h = h
     @x = x
@@ -9,9 +9,11 @@ class BaseObject
     @x_acceleration = x_acceleration
     @y_acceleration = y_acceleration
     @gravity = gravity
+    @sprite_change_frequency = sprite_change_frequency
+    @current_sprite_index = 0
   end
 
-  attr_accessor :w, :h, :x, :y, :x_velocity, :y_velocity, :x_acceleration, :y_acceleration, :gravity
+  attr_accessor :w, :h, :x, :y, :x_velocity, :y_velocity, :x_acceleration, :y_acceleration, :gravity, :sprite_change_frequency, :current_sprite_index
 
   def calc
     return unless can_move?
@@ -48,13 +50,23 @@ class BaseObject
     raise NotImplementedError
   end
 
+  def sprites
+    raise NotImplementedError
+  end
+
   def to_sprite
+    # change to the next sprite after the specified number of ticks
+    if Kernel.tick_count % @sprite_change_frequency == 0
+      @current_sprite_index += 1
+      @current_sprite_index = 0 if @current_sprite_index >= sprites.length
+    end
+
     {
       x: @x,
       y: @y,
       w: @w,
       h: @h,
-      path: sprite_path
+      path: sprites[@current_sprite_index]
     }
   end
 end
