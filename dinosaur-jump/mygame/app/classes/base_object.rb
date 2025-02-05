@@ -15,24 +15,24 @@ class BaseObject
 
   attr_accessor :w, :h, :x, :y, :x_velocity, :y_velocity, :x_acceleration, :y_acceleration, :gravity, :sprite_change_frequency, :current_sprite_index
 
+  # This function should be implemented in every instantiable class
+  # and calculates where the object should be drawn depending on
+  # that objects position, velocity, and acceleration and any changes
+  # in those values based on input or game events
+
+  # objects can override this if they do class specific things, but should
+  # finish by calling super to calculate position, velocity, and acceleration
   def calc
     return unless can_move?
-    # This function should be implemented in every instantiable class
-    # and calculates where the object should be drawn depending on
-    # that objects position, velocity, and acceleration and any changes
-    # in those values based on input or game events
-
-    # objects can override this if they do class specific things, but should
-    # finish by calling super to calculate position, velocity, and acceleration
 
     # calculate positions from position and velocity
-    @x = @x + @x_velocity
+    @x += @x_velocity
     @y = [@y + @y_velocity, 0].max
 
     # calculate velocity from velocity and acceleration
-    @x_velocity = @x_velocity + @x_acceleration
-    if @y > 0
-      @y_velocity = @y_velocity + @gravity
+    @x_velocity += @x_acceleration
+    if @y.positive?
+      @y_velocity += @gravity
     else
       @y_velocity = 0
     end
@@ -56,7 +56,7 @@ class BaseObject
 
   def to_sprite
     # change to the next sprite after the specified number of ticks
-    if Kernel.tick_count % @sprite_change_frequency == 0
+    if (Kernel.tick_count % @sprite_change_frequency).zero?
       @current_sprite_index += 1
       @current_sprite_index = 0 if @current_sprite_index >= sprites.length
     end

@@ -1,10 +1,10 @@
 # This is a singleton class that is in charge of coordinating all game objects
 # and drawing them to the screen each frame
-require_relative 'base_object.rb'
-require_relative 'background.rb'
-require_relative 'player.rb'
-require_relative 'cactus.rb'
-require_relative 'pterodactyl.rb'
+require_relative 'base_object'
+require_relative 'background'
+require_relative 'player'
+require_relative 'cactus'
+require_relative 'pterodactyl'
 
 class GameObject
   def initialize(args)
@@ -17,6 +17,8 @@ class GameObject
   attr_reader :player, :input_args, :output_args
   attr_accessor :game_over
 
+  # This is the main method that gets called every frame
+  # it does all the necessary calculations and rendering
   def call
     add_new_objects
     handle_input
@@ -36,11 +38,11 @@ class GameObject
   def add_new_objects
     return if @game_over
 
-    if rand(220) == 0
+    if rand(220).zero?
       @output_args.state.objects << Cactus.new(x: Grid.w, y: 0, w: 60, h: 80, x_velocity: -7, gravity: 0)
     end
 
-    if rand(500) == 0
+    if rand(500).zero?
       @output_args.state.objects << Pterodactyl.new(x: Grid.w, y: (rand(150) + 100), w: 80, h: 70, x_velocity: -9, gravity: 0)
     end
   end
@@ -58,16 +60,15 @@ class GameObject
 
     @output_args.state.objects.each do |object|
       next unless object.can_move?
+
       object.calc
     end
   end
 
   def handle_player_calculation
-
     return if @game_over
 
     @player.calc
-
   end
 
   def handle_collisions
@@ -106,11 +107,12 @@ class GameObject
   end
 
   def check_for_game_reset
-    if @input_args.inputs.keyboard.key_down.space
-      @output_args.state.game_duration = 0
-      @output_args.state.game_over = false
-      @output_args.state.player = Player.new
-      @output_args.state.objects = []
-    end
+    return unless @input_args.inputs.keyboard.key_down.space
+
+    # reset necessary state back to default
+    @output_args.state.game_duration = 0
+    @output_args.state.game_over = false
+    @output_args.state.player = Player.new
+    @output_args.state.objects = []
   end
 end

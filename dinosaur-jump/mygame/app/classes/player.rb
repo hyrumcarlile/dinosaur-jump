@@ -47,8 +47,11 @@ class Player < BaseObject
     true
   end
 
+  def hitbox
+    { left: @x + 30, right: @x + @w - 20, bottom: @y, top: @y + @h - 20 }
+  end
+
   def check_for_collisions(objects:)
-    hitbox = { left: @x + 30, right: @x + @w - 20, bottom: @y, top: @y + @h - 20}
     objects.each do |object|
       mins_overlap = (object.x >= hitbox[:left] && object.x <= hitbox[:right]) && (object.y >= hitbox[:bottom] && object.y <= hitbox[:top])
       maxs_overlap = (object.x + object.w >= hitbox[:left] && object.x + object.w <= hitbox[:right]) && (object.y + object.h >= hitbox[:bottom] && object.y + object.h <= hitbox[:top])
@@ -58,7 +61,7 @@ class Player < BaseObject
       return true # collision
     end
 
-    return false # no collisions with any objects
+    false # no collisions with any objects
   end
 
   def sprites
