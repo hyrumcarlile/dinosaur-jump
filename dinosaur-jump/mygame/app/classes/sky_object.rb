@@ -1,0 +1,3 @@
+class SkyObject < EnvironmentObject
+
+end

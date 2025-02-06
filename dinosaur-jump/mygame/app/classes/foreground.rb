@@ -1,0 +1,3 @@
+class Foreground < StaticObject
+
+end

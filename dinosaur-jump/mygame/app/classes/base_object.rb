@@ -1,5 +1,5 @@
 class BaseObject
-  def initialize(w: 0, h: 0, x: 0, y: 0, x_velocity: 0, y_velocity: 0, x_acceleration: 0, y_acceleration: 0, gravity: -1, sprite_change_frequency: 5)
+  def initialize(w: 0, h: 0, x: 0, y: 0, x_velocity: 0, y_velocity: 0, x_acceleration: 0, y_acceleration: 0, gravity: -1)
     @w = w
     @h = h
     @x = x
@@ -9,11 +9,11 @@ class BaseObject
     @x_acceleration = x_acceleration
     @y_acceleration = y_acceleration
     @gravity = gravity
-    @sprite_change_frequency = sprite_change_frequency
-    @current_sprite_index = 0
   end
 
-  attr_accessor :w, :h, :x, :y, :x_velocity, :y_velocity, :x_acceleration, :y_acceleration, :gravity, :sprite_change_frequency, :current_sprite_index
+  attr_reader :x_velocity
+
+  attr_accessor :w, :h, :x, :y, :y_velocity, :x_acceleration, :y_acceleration, :gravity
 
   # This function should be implemented in every instantiable class
   # and calculates where the object should be drawn depending on
@@ -26,6 +26,9 @@ class BaseObject
     return unless can_move?
 
     # calculate positions from position and velocity
+    puts "object: #{self}"
+    puts "y: #{@y}"
+    puts "y_velocity: #{@y_velocity}"
     @x += @x_velocity
     @y = [@y + @y_velocity, 0].max
 
@@ -42,7 +45,7 @@ class BaseObject
     raise NotImplementedError
   end
 
-  def sprite_path
+  def sprite_path(is_day:)
     raise NotImplementedError
   end
 
@@ -54,19 +57,13 @@ class BaseObject
     raise NotImplementedError
   end
 
-  def to_sprite
-    # change to the next sprite after the specified number of ticks
-    if (Kernel.tick_count % @sprite_change_frequency).zero?
-      @current_sprite_index += 1
-      @current_sprite_index = 0 if @current_sprite_index >= sprites.length
-    end
-
+  def to_sprite(is_day:)
     {
       x: @x,
       y: @y,
       w: @w,
       h: @h,
-      path: sprites[@current_sprite_index]
+      path: sprite_path(is_day: @is_day)
     }
   end
 end

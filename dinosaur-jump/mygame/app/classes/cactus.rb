@@ -1,13 +1,5 @@
-class Cactus < BaseObject
+class Cactus < StaticObject
   def damages_player?
     true
-  end
-
-  def can_move?
-    true
-  end
-
-  def sprites
-    ['sprites/misc/cactus.png']
   end
 end
