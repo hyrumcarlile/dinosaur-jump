@@ -21,6 +21,7 @@ class GameObject
   # the same GameObject instance.
   def initialize(args)
     @args = args
+    @high_score = 0
 
     # This is a brand new game, so treat it the same as a
     # reset.
@@ -29,19 +30,23 @@ class GameObject
 
   attr_reader :logger
 
-  attr_accessor :game_over, :next_enemy_spawn, :is_day, :player, :args, :game_duration, :running_speed
+  attr_accessor :game_over, :next_enemy_spawn, :is_day, :player, :args, :game_duration, :running_speed, :score, :day_changed_at, :game_over_at
 
   # This is the main method that gets called every frame
   # it does all the necessary calculations and rendering
   def call
+    game_actions
+    render_actions
+  end
+
+  def render_actions
+    # Order is important! The objects later in the @args.outputs.sprites
+    # array are rendered on top
     log "Handling Input"
     handle_input
 
     log "Rendering Environment"
     render_environment
-
-    log "Rendering UI"
-    render_ui
 
     log "Rendering Sprites"
     render_sprites
@@ -49,7 +54,15 @@ class GameObject
     log "Rendering Player"
     render_player
 
+    log "Rendering UI"
+    render_ui
+  end
+
+  def game_actions
     return if @game_over
+
+    log "Updating Time of Day"
+    handle_day_change
 
     # log "Increasing Running Speed"
     # handle_increase_running_speed if (@game_duration % 300).zero?
@@ -79,6 +92,7 @@ class GameObject
   end
 
   def handle_input
+    return if @game_over_at && Kernel.tick_count - @game_over_at < 100
     if @game_over
       check_for_game_reset
     else
@@ -88,50 +102,55 @@ class GameObject
 
   def handle_object_calculations
     @args.state.objects.each(&:calc)
-    @args.state.environment_objects.each(&:calc)
+    @args.state.sky_objects.each(&:calc)
+    @args.state.background_objects.each(&:calc)
+    @args.state.foreground_objects.each(&:calc)
     @player.calc
   end
 
   def handle_collisions
     return unless @player.check_for_collisions(objects: @args.state.objects.select(&:damages_player?))
 
-    handle_game_over
+    handle_collision
+  end
+
+  def handle_collision
+    handle_game_over if @player.lives.zero?
   end
 
   def handle_game_over
     @game_over = true
-    # @args.state.objects.each do |object|
-    #   object.x_velocity = 0
-    #   object.y_velocity = 0
-    #   object.x_acceleration = 0
-    #   object.y_acceleration = 0
-    # end
-
-    # @args.state.environment_objects.each do |object|
-    #   object.x_velocity = 0
-    #   object.y_velocity = 0
-    #   object.x_acceleration = 0
-    #   object.y_acceleration = 0
-    # end
+    @game_over_at = Kernel.tick_count
   end
 
   def render_ui
-    @args.outputs.labels << { x: Grid.w - 150, y: Grid.h - 20, text: "Score: #{(@game_duration / 5).to_i}" }
+    @args.outputs.labels << { x: Grid.w - 300, y: Grid.h - 20, text: "Distance Traveled: #{distance(@score)}" }
+    @args.outputs.labels << { x: Grid.w - 190, y: Grid.h - 40, text: "Record: #{distance(@high_score)}" }
+
+    @args.outputs.sprites << {w: Grid.w - 500, h: Grid.h - 100, x: 250, y: 100, path: 'sprites/ui/game_over.png'} if @game_over
+    @args.outputs.labels << { x: (Grid.w / 2) - 100, y: 220, text: "Press Space to Reset" } if @game_over_at && Kernel.tick_count - @game_over_at >= 100
+
+    current_life_index = 0
+    @player.lives.times do
+      @args.outputs.sprites << {x: 30 + current_life_index * 40, y: Grid.h - 40, w: 19 * 2, h: 16 * 2, path: 'sprites/ui/heart-full.png' }
+      current_life_index += 1
+    end
+    (@player.max_lives - @player.lives).times do
+      @args.outputs.sprites << {x: 30 + current_life_index * 40, y: Grid.h - 40, w: 19 * 2, h: 16 * 2, path: 'sprites/ui/heart-empty.png' }
+      current_life_index += 1
+    end
   end
 
   def render_environment
-    [SkyObject, Background, Foreground].each do |klass|
-      @args.state.environment_objects.select{ |object| object.is_a?(klass) }.each do |object|
-        # log object.sprite_path(is_day: @is_day)
-        @args.outputs.sprites << object.to_sprite(is_day: @is_day)
-      end
-    end
+    # Order is important! The objects later in the @args.outputs.sprites
+    # array are rendered on top
+    @args.outputs.sprites << @args.state.sky_objects.map{ |object| object.to_sprite(is_day: @is_day) }
+    @args.outputs.sprites << @args.state.background_objects.map{ |object| object.to_sprite(is_day: @is_day) }
+    @args.outputs.sprites << @args.state.foreground_objects.map{ |object| object.to_sprite(is_day: @is_day) }
   end
 
   def render_sprites
-    @args.state.objects.each do |object|
-      @args.outputs.sprites << object.to_sprite(is_day: @is_day)
-    end
+    @args.outputs.sprites << @args.state.objects.map{ |object| object.to_sprite(is_day: @is_day) }
   end
 
   def render_player
@@ -150,25 +169,45 @@ class GameObject
   def create_new_environment
     log "Creating environment"
 
-    [Foreground, Background, SkyObject].each do |klass|
-      last_object = @args.state.environment_objects.select{ |object| object.is_a?(klass) }.last
-      where_to_put_the_next_object_created = last_object&.x&.+(last_object&.w) || 0
+    # Create Sky
+    last_object = @args.state.sky_objects.last
+    where_to_put_the_next_object_created = last_object&.x&.+(last_object&.w) || 0
 
-      puts "last_object: #{last_object.inspect}" unless klass == Foreground
-      puts "where_to_put_the_next_object_created: #{where_to_put_the_next_object_created}" unless klass == Foreground
+    ((Grid.w * 1.5) / SkyObject::SPRITE_WIDTH).to_i.times do
+      new_object = SkyObject.new(x: where_to_put_the_next_object_created)
+      @args.state.sky_objects << new_object
+      where_to_put_the_next_object_created += new_object.w
+    end unless where_to_put_the_next_object_created > Grid.w * 1.5
 
-      return if where_to_put_the_next_object_created > Grid.w * 3
+    # Create Background
+    last_object = @args.state.background_objects.last
+    where_to_put_the_next_object_created = last_object&.x&.+(last_object&.w) || 0
 
-      ((Grid.w * 3) / klass::SPRITE_WIDTH).to_i.times do
-        new_object = klass.new(x: where_to_put_the_next_object_created)
-        @args.state.environment_objects << new_object
-        where_to_put_the_next_object_created += new_object.w
-      end
-    end
+    ((Grid.w * 1.5) / Background::SPRITE_WIDTH).to_i.times do
+      new_object = Background.new(x: where_to_put_the_next_object_created)
+      @args.state.background_objects << new_object
+      where_to_put_the_next_object_created += new_object.w
+    end unless where_to_put_the_next_object_created > Grid.w * 1.5
+
+    # Create Foreground
+    last_object = @args.state.foreground_objects.last
+    where_to_put_the_next_object_created = last_object&.x&.+(last_object&.w) || 0
+
+    ((Grid.w * 1.5) / Foreground::SPRITE_WIDTH).to_i.times do
+      new_object = Foreground.new(x: where_to_put_the_next_object_created)
+      @args.state.foreground_objects << new_object
+      where_to_put_the_next_object_created += new_object.w
+    end unless where_to_put_the_next_object_created > Grid.w * 1.5
   end
 
   def remove_old_objects
-    @args.state.environment_objects = @args.state.environment_objects.select{ |object| (object.x + object.w).positive? }
+    # increment @score for every foreground object that the player runs past
+    @score += @args.state.foreground_objects.select{ |object| (object.x + object.w).negative? }.length
+    @high_score = @score if @score > @high_score
+
+    # remove sprites to left of the grid from memory
+    @args.state.background_objects = @args.state.background_objects.select{ |object| (object.x + object.w).positive? }
+    @args.state.foreground_objects = @args.state.foreground_objects.select{ |object| (object.x + object.w).positive? }
     @args.state.objects = @args.state.objects.select{ |object| (object.x + object.w).positive? }
   end
 
@@ -177,11 +216,28 @@ class GameObject
     @player.rotate_sprite
   end
 
+  def handle_day_change
+    return unless (@score % 100).zero?
+    return if @score == 0
+    return if Kernel.tick_count - @day_changed_at < 100
+
+    @is_day = !@is_day
+    @day_changed_at = Kernel.tick_count
+  end
+
   def handle_enemy_spawn
     if rand(100) < 60
-      @args.state.objects << Cactus.new
+      (rand(3) + 1).times do |i|
+        @args.state.objects << Cactus.new(x: Grid.w + i * Cactus::SPRITE_WIDTH * ZOOM_COEFFICIENT)
+      end
     else
-      @args.state.objects << Pterodactyl.new
+      (rand(3) + 1).times do |i|
+        pterodactyl = Pterodactyl.new(x: Grid.w + i * Pterodactyl::SPRITE_WIDTH * ZOOM_COEFFICIENT)
+        puts pterodactyl.y
+        pterodactyl.y += (i * Pterodactyl::SPRITE_HEIGHT * ZOOM_COEFFICIENT)
+        puts pterodactyl.y
+        @args.state.objects << pterodactyl
+      end
     end
 
     set_next_enemy_spawn
@@ -201,20 +257,36 @@ class GameObject
 
   def handle_reset
     @game_duration = 0
+    @score = 0
     @game_over = false
+    @game_over_at = nil
     @player = Player.new
     set_next_enemy_spawn
     @args.state.objects = []
-    @args.state.environment_objects = []
+    @args.state.sky_objects = []
+    @args.state.background_objects = []
+    @args.state.foreground_objects = []
     @is_day = true
     @running_speed = DEFAULT_RUNNING_SPEED
+    @day_changed_at = Kernel.tick_count
   end
 
   def set_next_enemy_spawn
     # Enemies start by spawning roughly every 2 seconds
-    # and each 1500 ticks, the rough time between enemy
+    # and each 100 score, the rough time between enemy
     # spawns is slightly decreased.
-    @next_enemy_spawn = (Kernel.tick_count + 120 + rand(20) - (@game_duration / 1500)).to_i
+    @next_enemy_spawn = (Kernel.tick_count + 120 + rand(20) - (@score / 100)).to_i
+  end
+
+  def distance(number)
+    digits = number.to_s.length
+
+    case digits
+    when 1..3
+      return "#{number}m"
+    when 4..6
+      return "#{sprintf('%.2f', number / 1000.0)}km"
+    end
   end
 
   def log(message)

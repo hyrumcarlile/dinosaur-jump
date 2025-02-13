@@ -9,7 +9,11 @@ class StaticObject < BaseObject
   attr_accessor :sprite_number
 
   def sprite_path(is_day:)
-    postfix = is_day ? 'day' : 'night'
+    if is_day
+      postfix = 'day'
+    else
+      postfix = 'night'
+    end
 
     path = "sprites/misc/#{self.class.name.downcase}/#{postfix}/#{@sprite_number}.png"
     # log path

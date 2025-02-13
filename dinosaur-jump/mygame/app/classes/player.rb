@@ -1,23 +1,27 @@
 class Player < AnimatedObject
-  SPRITE_WIDTH = 30
-  SPRITE_HEIGHT = 24
+  SPRITE_WIDTH = 22
+  SPRITE_HEIGHT = 21
+  INVINCIBILITY_LENGTH = 120
 
   def initialize(w: 0, h: 0, x: 30, y: 0, x_velocity: 0, y_velocity: 0, x_acceleration: 0, y_acceleration: 0, gravity: -1, sprite_change_frequency: 5, current_sprite_index: 0, max_sprite_index: 4, action: :running, action_at: nil)
     super(w: w, h: h, x: x, y: y, x_velocity: x_velocity, y_velocity: y_velocity, x_acceleration: x_acceleration, y_acceleration: y_acceleration, gravity: gravity, sprite_change_frequency: sprite_change_frequency, current_sprite_index: current_sprite_index, max_sprite_index: max_sprite_index, action: action)
     @y = y + GROUND_LEVEL
     @action_at = action_at
+    @lives = 3
+    @player_has_invincibility_until = 0
+    @max_lives = 3
   end
 
   ALLOWED_JUMP_INCREASE_TIME = 10
   JUMP_INCREASE_POWER = 1
   JUMP_POWER = 15
   MAX_SPRITE_INDEXES_FOR_ACTIONS = {
-    running: 4,
+    running: 3,
     jumping: 0,
     crouching: 3
   }
 
-  attr_accessor :action, :action_at
+  attr_accessor :action, :action_at, :lives, :temporary_invincibility_from, :hurt_at, :player_has_invincibility_until, :lives, :max_lives
 
   def handle_input(args:)
     if args.inputs.keyboard.key_down.space
@@ -57,11 +61,11 @@ class Player < AnimatedObject
   def sprite_dimensions
     case @action
     when :running
-      { w: 30, h: 24 }
+      { w: 22, h: 21 }
     when :crouching
       { w: 30, h: 17 }
     when :jumping
-      { w: 30, h: 24 }
+      { w: 22, h: 23 }
     end
   end
 
@@ -70,16 +74,34 @@ class Player < AnimatedObject
   end
 
   def check_for_collisions(objects:)
+    return if Kernel.tick_count < @player_has_invincibility_until
+
     objects.each do |object|
       mins_overlap = (object.x >= hitbox[:left] && object.x <= hitbox[:right]) && (object.y >= hitbox[:bottom] && object.y <= hitbox[:top])
       maxs_overlap = (object.x + object.w >= hitbox[:left] && object.x + object.w <= hitbox[:right]) && (object.y + object.h >= hitbox[:bottom] && object.y + object.h <= hitbox[:top])
 
       next unless mins_overlap || maxs_overlap # no collision so check the next object
 
+      @hurt_at = Kernel.tick_count
+      @player_has_invincibility_until = Kernel.tick_count + INVINCIBILITY_LENGTH
+      @lives -= 1
       return true # collision
     end
 
     false # no collisions with any objects
+  end
+
+  def sprite_path(is_day:)
+    # if hurt at occured in last 2 seconds and still have lives, flash the player sprite
+    if @hurt_at && @lives > 0 && Kernel.tick_count - @hurt_at < INVINCIBILITY_LENGTH
+      if (((Kernel.tick_count - @hurt_at).round.to_i / 10).round.to_i % 2).zero?
+        return 'sprites/misc/blank.png'
+      else
+        return super(is_day: is_day)
+      end
+    else
+      return super(is_day: is_day)
+    end
   end
 
   private

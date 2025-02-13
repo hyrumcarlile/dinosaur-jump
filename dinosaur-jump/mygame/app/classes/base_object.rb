@@ -59,7 +59,7 @@ class BaseObject
       y: @y,
       w: @w,
       h: @h,
-      path: sprite_path(is_day: @is_day)
+      path: sprite_path(is_day: is_day)
     }
   end
 

@@ -19,7 +19,11 @@ class AnimatedObject < BaseObject
   end
 
   def sprite_path(is_day:)
-    postfix = is_day ? 'day' : 'night'
+    if is_day
+      postfix = 'day'
+    else
+      postfix = 'night'
+    end
     # change to the next sprite after the specified number of ticks
     log "current_sprite_index: #{@current_sprite_index}"
     log "max_sprite_index: #{@max_sprite_index}"
