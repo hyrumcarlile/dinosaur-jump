@@ -54,6 +54,17 @@ class Player < AnimatedObject
     true
   end
 
+  def sprite_dimensions
+    case @action
+    when :running
+      { w: 30, h: 24 }
+    when :crouching
+      { w: 30, h: 17 }
+    when :jumping
+      { w: 30, h: 24 }
+    end
+  end
+
   def hitbox
     { left: @x + 30, right: @x + @w - 20, bottom: @y, top: @y + @h - 20 }
   end
@@ -81,7 +92,11 @@ class Player < AnimatedObject
     # add jump power for the first 10 frames if space
     # is held down
     @action_at = Kernel.tick_count
+
     @action = new_action
+    @gravity = @action == :crouching ? -2 : -1
+    @w = sprite_dimensions[:w] * ZOOM_COEFFICIENT
+    @h = sprite_dimensions[:h] * ZOOM_COEFFICIENT
     @current_sprite_index = 0
     @max_sprite_index = MAX_SPRITE_INDEXES_FOR_ACTIONS[@action.to_sym]
   end

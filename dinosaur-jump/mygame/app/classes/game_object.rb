@@ -13,7 +13,7 @@ require_relative 'pterodactyl'
 
 ZOOM_COEFFICIENT = 4
 GROUND_LEVEL = Foreground::SPRITE_HEIGHT * ZOOM_COEFFICIENT
-RUNNING_SPEED = -7 # negative because the player is stationary and everything else is moving backward
+DEFAULT_RUNNING_SPEED = -7 # negative because the player is stationary and everything else is moving backward
 
 class GameObject
   # Initialize should only be called once, the very
@@ -29,7 +29,7 @@ class GameObject
 
   attr_reader :logger
 
-  attr_accessor :game_over, :next_enemy_spawn, :is_day, :player, :args, :game_duration
+  attr_accessor :game_over, :next_enemy_spawn, :is_day, :player, :args, :game_duration, :running_speed
 
   # This is the main method that gets called every frame
   # it does all the necessary calculations and rendering
@@ -50,6 +50,9 @@ class GameObject
     render_player
 
     return if @game_over
+
+    # log "Increasing Running Speed"
+    # handle_increase_running_speed if (@game_duration % 300).zero?
 
     log "Adding New Objects"
     add_new_objects
@@ -151,9 +154,12 @@ class GameObject
       last_object = @args.state.environment_objects.select{ |object| object.is_a?(klass) }.last
       where_to_put_the_next_object_created = last_object&.x&.+(last_object&.w) || 0
 
-      return if where_to_put_the_next_object_created > Grid.w * 4
+      puts "last_object: #{last_object.inspect}" unless klass == Foreground
+      puts "where_to_put_the_next_object_created: #{where_to_put_the_next_object_created}" unless klass == Foreground
 
-      ((Grid.w * 4) / klass::SPRITE_WIDTH).to_i.times do
+      return if where_to_put_the_next_object_created > Grid.w * 3
+
+      ((Grid.w * 3) / klass::SPRITE_WIDTH).to_i.times do
         new_object = klass.new(x: where_to_put_the_next_object_created)
         @args.state.environment_objects << new_object
         where_to_put_the_next_object_created += new_object.w
@@ -181,6 +187,18 @@ class GameObject
     set_next_enemy_spawn
   end
 
+  # def handle_increase_running_speed
+  #   @running_speed -= 1
+
+  #   @args.state.objects.each do |object|
+  #     object.x_velocity = @running_speed
+  #   end
+
+  #   @args.state.environment_objects do |object|
+  #     object.x_velocity = @running_speed
+  #   end
+  # end
+
   def handle_reset
     @game_duration = 0
     @game_over = false
@@ -189,6 +207,7 @@ class GameObject
     @args.state.objects = []
     @args.state.environment_objects = []
     @is_day = true
+    @running_speed = DEFAULT_RUNNING_SPEED
   end
 
   def set_next_enemy_spawn
