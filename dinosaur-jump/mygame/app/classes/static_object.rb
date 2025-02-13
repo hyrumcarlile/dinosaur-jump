@@ -11,6 +11,8 @@ class StaticObject < BaseObject
   def sprite_path(is_day:)
     postfix = is_day ? 'day' : 'night'
 
-    "sprites/misc/#{self.class.name.downcase}/#{postfix}/#{@sprite_number}.png"
+    path = "sprites/misc/#{self.class.name.downcase}/#{postfix}/#{@sprite_number}.png"
+    # log path
+    path
   end
 end

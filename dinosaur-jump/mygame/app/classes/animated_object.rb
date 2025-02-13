@@ -14,13 +14,15 @@ class AnimatedObject < BaseObject
   def sprite_path(is_day:)
     postfix = is_day ? 'day' : 'night'
     # change to the next sprite after the specified number of ticks
-    puts "current_sprite_index: #{@current_sprite_index}"
-    puts "max_sprite_index: #{@max_sprite_index}"
+    log "current_sprite_index: #{@current_sprite_index}"
+    log "max_sprite_index: #{@max_sprite_index}"
     if Kernel.tick_count % @sprite_change_frequency == 0
       @current_sprite_index += 1
       @current_sprite_index = 0 if @current_sprite_index >= @max_sprite_index
     end
 
-    "sprites/misc/#{self.class.name.downcase}/#{postfix}/#{@action.to_s}/#{@current_sprite_index}.png"
+    path = "sprites/misc/#{self.class.name.downcase}/#{postfix}/#{@action.to_s}/#{@current_sprite_index}.png"
+    # log path
+    path
   end
 end

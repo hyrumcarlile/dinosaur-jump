@@ -1,4 +1,13 @@
 class Player < AnimatedObject
+  SPRITE_WIDTH = 30
+  SPRITE_HEIGHT = 24
+
+  def initialize(w: 0, h: 0, x: 30, y: 0, x_velocity: 0, y_velocity: 0, x_acceleration: 0, y_acceleration: 0, gravity: -1, sprite_change_frequency: 5, current_sprite_index: 0, max_sprite_index: 4, action: :running, action_at: nil)
+    super(w: w, h: h, x: x, y: y, x_velocity: x_velocity, y_velocity: y_velocity, x_acceleration: x_acceleration, y_acceleration: y_acceleration, gravity: gravity, sprite_change_frequency: sprite_change_frequency, current_sprite_index: current_sprite_index, max_sprite_index: max_sprite_index, action: action)
+    @y = y + GROUND_LEVEL
+    @action_at = action_at
+  end
+
   ALLOWED_JUMP_INCREASE_TIME = 10
   JUMP_INCREASE_POWER = 1
   JUMP_POWER = 15
@@ -8,16 +17,11 @@ class Player < AnimatedObject
     crouching: 3
   }
 
-  def initialize(w: 60, h: 48, x: 30, y: 0, x_velocity: 0, y_velocity: 0, x_acceleration: 0, y_acceleration: 0, gravity: -1, sprite_change_frequency: 5, current_sprite_index: 0, max_sprite_index: 4, action: :running, action_at: nil)
-    super(w: w, h: h, x: x, y: y, x_velocity: x_velocity, y_velocity: y_velocity, x_acceleration: x_acceleration, y_acceleration: y_acceleration, gravity: gravity, sprite_change_frequency: sprite_change_frequency, current_sprite_index: current_sprite_index, max_sprite_index: max_sprite_index, action: action)
-    @action_at = action_at
-  end
-
   attr_accessor :action, :action_at
 
   def handle_input(args:)
     if args.inputs.keyboard.key_down.space
-      if @y == 0 # player is on the ground and can jump
+      if @y == GROUND_LEVEL # player is on the ground and can jump
         @y_velocity = JUMP_POWER
         handle_action_change(new_action: :jumping)
       end
@@ -28,7 +32,7 @@ class Player < AnimatedObject
       # if the player is jumping
       # and the elapsed time is less than
       # the allowed time
-      if @y > 0 && @action == :jumping && (@action_at.elapsed_time < ALLOWED_JUMP_INCREASE_TIME)
+      if @y > GROUND_LEVEL && @action == :jumping && (@action_at.elapsed_time < ALLOWED_JUMP_INCREASE_TIME)
          # increase the y_velocity by the increase power
          @y_velocity += JUMP_INCREASE_POWER
       end
@@ -40,7 +44,7 @@ class Player < AnimatedObject
 
     # player is on the ground and no keys are being pressed
     # so make the action the default :running
-    if @y == 0 && !args.inputs.keyboard.active
+    if @y == GROUND_LEVEL && !args.inputs.keyboard.active
       handle_action_change(new_action: :running)
     end
   end

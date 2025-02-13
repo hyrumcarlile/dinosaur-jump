@@ -1,11 +1,16 @@
 require_relative 'classes/game_object.rb'
+LOGGER = true
+
 def tick(args)
-  puts "-------------------- START TICK \##{Kernel.tick_count}--------------------------"
-  game_object = GameObject.new(args)
-  game_object.call
-  args = GameObject.output_args
-  # manually dereference the instance so garbage collector
-  # will clear it from memory
-  game_object = nil
-  puts "----------------- END TICK \##{Kernel.tick_count}-------------------------------"
+  puts "-------------------- START TICK \##{Kernel.tick_count}--------------------------" if LOGGER
+  puts "Creating Game Object" if LOGGER
+  args.state.game_object ||= GameObject.new(args)
+
+  puts "Calling Game Object" if LOGGER
+  args.state.game_object.call
+
+  puts "Setting Output Args" if LOGGER
+  args = args.state.game_object.output_args
+  puts "Total Objects: #{args.state.objects.length + args.state.environment_objects.length}"
+  puts "----------------- END TICK \##{Kernel.tick_count}-------------------------------" if LOGGER
 end
