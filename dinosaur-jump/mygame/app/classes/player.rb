@@ -25,10 +25,9 @@ class Player < AnimatedObject
         @y_velocity = JUMP_POWER
         handle_action_change(new_action: :jumping)
       end
-    end
 
     # if the space bar is being held
-    if args.inputs.keyboard.key_held.space
+    elsif args.inputs.keyboard.key_held.space
       # if the player is jumping
       # and the elapsed time is less than
       # the allowed time
@@ -36,15 +35,13 @@ class Player < AnimatedObject
          # increase the y_velocity by the increase power
          @y_velocity += JUMP_INCREASE_POWER
       end
-    end
 
-    if args.inputs.keyboard.key_held.c
+    elsif args.inputs.keyboard.key_held.c || args.inputs.keyboard.key_down.c
       handle_action_change(new_action: :crouching)
-    end
 
     # player is on the ground and no keys are being pressed
     # so make the action the default :running
-    if @y == GROUND_LEVEL && !args.inputs.keyboard.active
+    elsif @y == GROUND_LEVEL
       handle_action_change(new_action: :running)
     end
   end

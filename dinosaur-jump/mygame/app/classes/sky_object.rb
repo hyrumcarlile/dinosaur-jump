@@ -3,6 +3,6 @@ class SkyObject < EnvironmentObject
     super(w: w, h: h, x: x, y: y, x_velocity: x_velocity, y_velocity: y_velocity, x_acceleration: x_acceleration, y_acceleration: y_acceleration, gravity: gravity)
   end
 
-  SPRITE_WIDTH = 96
-  SPRITE_HEIGHT = 112
+  SPRITE_WIDTH = 96 * 2
+  SPRITE_HEIGHT = 112 * 2
 end

@@ -1,5 +1,5 @@
 require_relative 'classes/game_object.rb'
-LOGGER = true
+LOGGER = false
 
 def tick(args)
   puts "-------------------- START TICK \##{Kernel.tick_count}--------------------------" if LOGGER
@@ -10,7 +10,7 @@ def tick(args)
   args.state.game_object.call
 
   puts "Setting Output Args" if LOGGER
-  args = args.state.game_object.output_args
+  args = args.state.game_object.args
   puts "Total Objects: #{args.state.objects.length + args.state.environment_objects.length}"
   puts "----------------- END TICK \##{Kernel.tick_count}-------------------------------" if LOGGER
 end
