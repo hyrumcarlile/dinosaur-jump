@@ -233,9 +233,7 @@ class GameObject
     else
       (rand(3) + 1).times do |i|
         pterodactyl = Pterodactyl.new(x: Grid.w + i * Pterodactyl::SPRITE_WIDTH * ZOOM_COEFFICIENT)
-        puts pterodactyl.y
         pterodactyl.y += (i * Pterodactyl::SPRITE_HEIGHT * ZOOM_COEFFICIENT)
-        puts pterodactyl.y
         @args.state.objects << pterodactyl
       end
     end
