@@ -3,8 +3,8 @@ class Player < AnimatedObject
   SPRITE_HEIGHT = 21
   INVINCIBILITY_LENGTH = 120
 
-  def initialize(w: 0, h: 0, x: 30, y: 0, x_velocity: 0, y_velocity: 0, x_acceleration: 0, y_acceleration: 0, gravity: -1, sprite_change_frequency: 5, current_sprite_index: 0, max_sprite_index: 4, action: :running, action_at: nil)
-    super(w: w, h: h, x: x, y: y, x_velocity: x_velocity, y_velocity: y_velocity, x_acceleration: x_acceleration, y_acceleration: y_acceleration, gravity: gravity, sprite_change_frequency: sprite_change_frequency, current_sprite_index: current_sprite_index, max_sprite_index: max_sprite_index, action: action)
+  def initialize(x: 30, action: :running, action_at: nil, **args)
+    super(x: x, action: action, **args)
     @y = y + GROUND_LEVEL
     @action_at = action_at
     @lives = 3

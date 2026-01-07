@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# Run the DragonRuby test suite.
+# This command executes all tests loaded by mygame/app/main.rb.
+echo "Running all tests in app/tests and subdirectories"
+./dinosaur-jump/dragonruby mygame --test app/tests/tests.rb

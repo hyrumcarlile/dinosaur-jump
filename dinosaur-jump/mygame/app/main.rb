@@ -1,5 +1,7 @@
 require_relative 'classes/game_object.rb'
-LOGGER = false
+require_relative 'tests/tests.rb'
+
+LOGGER = true
 LOG_PERFORMANCE = false
 MAX_TIME_FOR_TICK = 0.016
 

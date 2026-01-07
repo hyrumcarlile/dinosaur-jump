@@ -1,7 +1,10 @@
 class BaseObject
-  def initialize(w: 0, h: 0, x: 0, y: 0, x_velocity: 0, y_velocity: 0, x_acceleration: 0, y_acceleration: 0, gravity: -1)
-    @w = default_width
-    @h = default_height
+  SPRITE_WIDTH = 0
+  SPRITE_HEIGHT = 0
+
+  def initialize(w: nil, h: nil, x: 0, y: 0, x_velocity: 0, y_velocity: 0, x_acceleration: 0, y_acceleration: 0, gravity: -1, **args)
+    @w = w || default_width
+    @h = h || default_height
     @x = x
     @y = y
     @x_velocity = x_velocity
@@ -10,6 +13,8 @@ class BaseObject
     @y_acceleration = y_acceleration
     @gravity = gravity
     @is_day = true
+
+    raise ArgumentError, "Unknown arguments passed to initializer for #{self.class.name}: #{args.keys.join(', ')}" unless args.empty?
   end
 
   attr_accessor :w, :h, :x, :y, :x_velocity, :y_velocity, :x_acceleration, :y_acceleration, :gravity, :is_day
@@ -46,11 +51,11 @@ class BaseObject
   end
 
   def sprite_path(is_day:)
-    raise NotImplementedError("\#sprite_path? not implemented for #{self}")
+    raise NotImplementedError("\#sprite_path? not implemented for #{self.class.name}")
   end
 
   def can_move?
-    raise NotImplementedError("\#can_move? not implemented for #{self}")
+    raise NotImplementedError("\#can_move? not implemented for #{self.class.name}")
   end
 
   def to_sprite(is_day:)

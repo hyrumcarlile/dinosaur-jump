@@ -212,8 +212,10 @@ class GameObject
   end
 
   def rotate_object_sprites
-    @args.state.objects.select{ |object| object.is_a?(AnimatedObject) }.each(&:rotate_sprite)
-    @player.rotate_sprite
+    tick_count = Kernel.tick_count
+    @args.state.objects.select { |object| object.is_a?(AnimatedObject) }.each { |object| object.rotate_sprite(tick_count: tick_count) }
+    @args.state.sky_.rotate_sprite(tick_count: tick_count)
+    @player.rotate_sprite(tick_count: tick_count)
   end
 
   def handle_day_change
