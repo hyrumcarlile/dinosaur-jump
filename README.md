@@ -14,3 +14,7 @@ A knockoff of the chrome dinosaur game using dragonruby
 Source code is located at ./dinosaur-jump/mygame/app/main.rb.
 
 Docs available online at docs.dragonruby.org, ./docs/docs.txt, and http://localhost:9001.
+
+## Unit Tests
+
+Run unit tests with the command `script/test` from the root of the repo
