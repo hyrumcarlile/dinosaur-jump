@@ -1,24 +1,24 @@
 # This is the main class that is in charge of coordinating all game objects
 # and drawing them to the screen each frame
-require_relative 'base_object'
-require_relative 'animated_object'
-require_relative 'static_object'
-require_relative 'environment_object'
-require_relative 'background'
-require_relative 'foreground'
-require_relative 'sky_object'
-require_relative 'player'
-require_relative 'cactus'
-require_relative 'pterodactyl'
+require 'app/classes/scenes/game_scene/base_object.rb'
+require 'app/classes/scenes/game_scene/animated_object.rb'
+require 'app/classes/scenes/game_scene/static_object.rb'
+require 'app/classes/scenes/game_scene/environment_object.rb'
+require 'app/classes/scenes/game_scene/background.rb'
+require 'app/classes/scenes/game_scene/foreground.rb'
+require 'app/classes/scenes/game_scene/sky_object.rb'
+require 'app/classes/scenes/game_scene/player.rb'
+require 'app/classes/scenes/game_scene/cactus.rb'
+require 'app/classes/scenes/game_scene/pterodactyl.rb'
 
 ZOOM_COEFFICIENT = 4
 GROUND_LEVEL = Foreground::SPRITE_HEIGHT * ZOOM_COEFFICIENT
 DEFAULT_RUNNING_SPEED = -7 # negative because the player is stationary and everything else is moving backward
 
-class GameObject
+class GameScene
   # Initialize should only be called once, the very
   # first tick. After that, each tick is still referencing
-  # the same GameObject instance.
+  # the same GameScene instance.
   def initialize(args)
     @args = args
     @high_score = 0
@@ -34,7 +34,8 @@ class GameObject
 
   # This is the main method that gets called every frame
   # it does all the necessary calculations and rendering
-  def call
+  def tick
+    handle_input
     game_actions
     render_actions
   end
@@ -42,8 +43,7 @@ class GameObject
   def render_actions
     # Order is important! The objects later in the @args.outputs.sprites
     # array are rendered on top
-    log "Handling Input"
-    handle_input
+    # array are rendered on top
 
     log "Rendering Environment"
     render_environment
@@ -95,6 +95,8 @@ class GameObject
     return if @game_over_at && Kernel.tick_count - @game_over_at < 100
     if @game_over
       check_for_game_reset
+    elsif @args.inputs.keyboard.key_down.escape
+      @args.state.scene = PauseMenuScene.new(@args, self)
     else
       @player.handle_input(args: @args)
     end
@@ -127,7 +129,7 @@ class GameObject
     @args.outputs.labels << { x: Grid.w - 300, y: Grid.h - 20, text: "Distance Traveled: #{distance(@score)}" }
     @args.outputs.labels << { x: Grid.w - 190, y: Grid.h - 40, text: "Record: #{distance(@high_score)}" }
 
-    @args.outputs.sprites << {w: Grid.w - 500, h: Grid.h - 100, x: 250, y: 100, path: 'sprites/ui/game_over.png'} if @game_over
+    @args.outputs.sprites << {w: 520, h: 352, x: 380, y: 270, path: 'sprites/text/game_over.png'} if @game_over
     @args.outputs.labels << { x: (Grid.w / 2) - 100, y: 220, text: "Press Space to Reset" } if @game_over_at && Kernel.tick_count - @game_over_at >= 100
 
     current_life_index = 0

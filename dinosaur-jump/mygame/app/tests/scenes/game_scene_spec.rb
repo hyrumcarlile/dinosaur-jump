@@ -1,5 +1,5 @@
 def test_game_object_initialization(args, assert)
-  game = GameObject.new(args)
+  game = GameScene.new(args)
   assert.equal! game.game_over, false, "Game should not be over on initialization"
   assert.equal! game.game_duration, 0, "Game duration should be 0 on initialization"
   assert.equal! game.score, 0, "Score should be 0 on initialization"
@@ -15,7 +15,7 @@ def test_game_object_initialization(args, assert)
 end
 
 def test_game_object_reset(args, assert)
-  game = GameObject.new(args)
+  game = GameScene.new(args)
   game.game_over = true
   game.game_duration = 100
   game.score = 500
@@ -37,7 +37,7 @@ def test_game_object_reset(args, assert)
 end
 
 def test_game_object_add_new_objects(args, assert)
-  game = GameObject.new(args)
+  game = GameScene.new(args)
   game.args.state.sky_objects = []
   game.args.state.background_objects = []
   game.args.state.foreground_objects = []

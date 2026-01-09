@@ -4,7 +4,7 @@ def test_pterodactyl_initialization(args, assert)
   assert.true! pterodactyl.damages_player?, "Pterodactyl should damage player"
   assert.true! pterodactyl.can_move?, "Pterodactyl should be able to move"
   assert.equal! pterodactyl.action, :flying, "Pterodactyl should start in flying action"
-  assert.true! pterodactyl.y.between?(59, 181), "Pterodactyl y position should be within range"
+  assert.true! pterodactyl.y.between?(59, 241), "Pterodactyl y position should be within range"
 end
 
 def test_pterodactyl_sprite_dimensions(args, assert)

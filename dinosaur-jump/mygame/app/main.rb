@@ -1,4 +1,7 @@
-require_relative 'classes/game_object.rb'
+require_relative 'scenes/game_scene.rb'
+require_relative 'scenes/menu_scene.rb'
+require_relative 'scenes/pause_menu_scene.rb'
+require_relative 'classes/services/text_renderer.rb'
 require_relative 'tests/tests.rb'
 
 LOGGER = true
@@ -28,15 +31,12 @@ end
 
 def main(args)
   puts "-------------------- START TICK \##{Kernel.tick_count}--------------------------" if LOGGER
-  puts "Creating Game Object" if LOGGER
-  args.state.game_object ||= GameObject.new(args)
 
-  puts "Calling Game Object" if LOGGER
-  args.state.game_object.call
+  args.state.scene ||= MenuScene.new(args)
 
-  puts "Setting Output Args" if LOGGER
-  args = args.state.game_object.args
-  puts "Total Objects: #{args.state.objects.length + args.state.foreground_objects.length + args.state.background_objects.length + args.state.sky_objects.length}" if LOGGER
+  puts "Calling Scene Tick" if LOGGER
+  args.state.scene.tick
+
   puts "----------------- END TICK \##{Kernel.tick_count}-------------------------------" if LOGGER
 end
 
